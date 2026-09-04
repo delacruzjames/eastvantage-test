@@ -7,6 +7,8 @@ from app.database import Base
 
 
 class Address(Base):
+    """Stored address with optional coordinates for distance search."""
+
     __tablename__ = "addresses"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

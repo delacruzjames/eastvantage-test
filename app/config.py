@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Runtime settings from the environment or `.env`."""
+
     app_name: str = "EastVantage Test API"
     database_url: str = "sqlite:///./data/app.db"
     log_level: str = "INFO"

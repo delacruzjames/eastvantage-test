@@ -1,9 +1,13 @@
+"""Pydantic schemas for address create, update, and read payloads."""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class AddressCreate(BaseModel):
+    """Payload for creating an address. Coordinates are required."""
+
     street: str = Field(..., min_length=1, max_length=255)
     city: str = Field(..., min_length=1, max_length=100)
     state: str = Field(..., min_length=1, max_length=100)
@@ -14,6 +18,8 @@ class AddressCreate(BaseModel):
 
 
 class AddressUpdate(BaseModel):
+    """Partial update. Only fields that are sent are changed."""
+
     street: str | None = Field(default=None, min_length=1, max_length=255)
     city: str | None = Field(default=None, min_length=1, max_length=100)
     state: str | None = Field(default=None, min_length=1, max_length=100)
@@ -42,6 +48,8 @@ class AddressNearby(BaseModel):
 
 
 class AddressRead(BaseModel):
+    """Address as returned by create and update."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
