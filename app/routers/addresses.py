@@ -48,3 +48,10 @@ def update_address(
     db.commit()
     db.refresh(address)
     return address
+
+
+@router.delete("/{address_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_address(address_id: int, db: Session = Depends(get_db)) -> None:
+    address = _get_address_or_404(address_id, db)
+    db.delete(address)
+    db.commit()
