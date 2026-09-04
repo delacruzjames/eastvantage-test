@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    container_name: eastvantage-test-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /app/.venv
+      - sqlite-data:/app/data
+    environment:
+      APP_NAME: EastVantage Test API
+      DATABASE_URL: sqlite:///./data/app.db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  sqlite-data:
