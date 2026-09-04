@@ -97,3 +97,27 @@ def test_patch_address_invalid_coordinates(client):
         json={"latitude": -91},
     )
     assert response.status_code == 422
+
+
+def test_delete_address(client):
+    created = client.post(
+        "/addresses",
+        json={
+            "street": "To Delete",
+            "city": "Manila",
+            "state": "NCR",
+            "postal_code": "1000",
+            "country": "Philippines",
+        },
+    ).json()
+
+    deleted = client.delete(f"/addresses/{created['id']}")
+    assert deleted.status_code == 204
+
+    again = client.delete(f"/addresses/{created['id']}")
+    assert again.status_code == 404
+
+
+def test_delete_address_not_found(client):
+    response = client.delete("/addresses/999")
+    assert response.status_code == 404
