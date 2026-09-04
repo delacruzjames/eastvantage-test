@@ -1,2 +1,3 @@
-# Import models here so SQLAlchemy registers them on startup:
-# from app.models.example import Example
+from app.models.address import Address
+
+__all__ = ["Address"]
