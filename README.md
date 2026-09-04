@@ -1,63 +1,57 @@
 # EastVantage Test API
 
-FastAPI + SQLite REST API with Swagger UI. Run it locally with Docker.
+FastAPI + SQLite address book API. Swagger is at `/docs`.
 
-## Make shortcuts
+## How to run (Makefile)
 
-```bash
-make help          # list commands
-make install       # create .venv and install deps
-make run           # run API locally (reload)
-make test          # run tests
-make migrate       # apply alembic migrations
-make docker-up     # docker compose up --build
-make docker-down   # docker compose down
-```
-
-## Quick start (Docker)
-
-Make sure Docker Desktop (or Colima) is running, then:
+From the project folder:
 
 ```bash
-make docker-up
+cd eastvantage-test
+make install
+make migrate
+make run
 ```
 
 Then open:
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger: http://localhost:8000/docs
 - Health: http://localhost:8000/health
 
-Stop the stack with `Ctrl+C` or `docker compose down`.
+Stop the server with `Ctrl+C`.
 
-SQLite data is stored in a Docker volume (`sqlite-data`).
-
-## Run without Docker
+If you just cloned the repo:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-## Tests
-
-```bash
-make test
-```
-
-## Migrations
-
-```bash
+git clone https://github.com/delacruzjames/eastvantage-test.git
+cd eastvantage-test
+make install
 make migrate
+make run
 ```
 
-Create a new revision after model changes:
+## Make commands
 
 ```bash
-.venv/bin/alembic revision --autogenerate -m "describe the change"
+make help          # list commands
+make install       # create .venv and install deps
+make run           # start the API with reload
+make migrate       # apply database migrations
+make test          # run tests
+make docker-up     # run with Docker Compose
+make docker-down   # stop Docker Compose
 ```
+
+## Docker
+
+Docker Desktop (or Colima) must be running:
+
+```bash
+cd eastvantage-test
+make docker-up
+```
+
+SQLite data is stored in a Docker volume (`sqlite-data`). Stop with `Ctrl+C` or `make docker-down`.
 
 ## API
 
