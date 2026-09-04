@@ -9,6 +9,7 @@ make help          # list commands
 make install       # create .venv and install deps
 make run           # run API locally (reload)
 make test          # run tests
+make migrate       # apply alembic migrations
 make docker-up     # docker compose up --build
 make docker-down   # docker compose down
 ```
@@ -43,7 +44,19 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ## Tests
 
 ```bash
-pytest
+make test
+```
+
+## Migrations
+
+```bash
+make migrate
+```
+
+Create a new revision after model changes:
+
+```bash
+.venv/bin/alembic revision --autogenerate -m "describe the change"
 ```
 
 ## API
@@ -51,5 +64,4 @@ pytest
 | Method | Path | Description |
 | --- | --- | --- |
 | GET | `/health` | Health check |
-
-Add domain models, schemas, and routers under `app/models`, `app/schemas`, and `app/routers`.
+| POST | `/addresses` | Create an address |
