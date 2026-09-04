@@ -23,6 +23,24 @@ class AddressUpdate(BaseModel):
     longitude: float | None = Field(default=None, ge=-180, le=180)
 
 
+class AddressNearby(BaseModel):
+    """An address plus how far it sits from the searched coordinates."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    street: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    latitude: float
+    longitude: float
+    created_at: datetime
+    updated_at: datetime
+    distance_km: float
+
+
 class AddressRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
