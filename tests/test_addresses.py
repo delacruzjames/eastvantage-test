@@ -24,7 +24,7 @@ def test_create_address(client):
     assert body["updated_at"]
 
 
-def test_create_address_without_coordinates(client):
+def test_create_address_requires_coordinates(client):
     response = client.post(
         "/addresses",
         json={
@@ -36,10 +36,7 @@ def test_create_address_without_coordinates(client):
         },
     )
 
-    assert response.status_code == 201
-    body = response.json()
-    assert body["latitude"] is None
-    assert body["longitude"] is None
+    assert response.status_code == 422
 
 
 def test_create_address_missing_fields(client):
@@ -89,6 +86,8 @@ def test_patch_address_invalid_coordinates(client):
             "state": "NCR",
             "postal_code": "1000",
             "country": "Philippines",
+            "latitude": 14.5995,
+            "longitude": 120.9842,
         },
     ).json()
 
@@ -108,6 +107,8 @@ def test_delete_address(client):
             "state": "NCR",
             "postal_code": "1000",
             "country": "Philippines",
+            "latitude": 14.5995,
+            "longitude": 120.9842,
         },
     ).json()
 
@@ -121,3 +122,61 @@ def test_delete_address(client):
 def test_delete_address_not_found(client):
     response = client.delete("/addresses/999")
     assert response.status_code == 404
+
+
+def _create(client, street, latitude=None, longitude=None):
+    return client.post(
+        "/addresses",
+        json={
+            "street": street,
+            "city": "Manila",
+            "state": "NCR",
+            "postal_code": "1000",
+            "country": "Philippines",
+            "latitude": latitude,
+            "longitude": longitude,
+        },
+    ).json()
+
+
+def test_list_addresses_nearby(client):
+    # Rizal Park, roughly 9 km from Bonifacio Global City.
+    _create(client, "Rizal Park", 14.5826, 120.9787)
+    _create(client, "Bonifacio Global City", 14.5503, 121.0493)
+    _create(client, "Cebu City", 10.3157, 123.8854)
+
+    response = client.get(
+        "/addresses",
+        params={"latitude": 14.5826, "longitude": 120.9787, "distance": 20},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    streets = [address["street"] for address in body]
+    assert streets == ["Rizal Park", "Bonifacio Global City"]
+    assert body[0]["distance_km"] == 0.0
+    assert 0 < body[1]["distance_km"] <= 20
+
+
+def test_list_addresses_nearby_excludes_far_addresses(client):
+    _create(client, "Rizal Park", 14.5826, 120.9787)
+    _create(client, "Cebu City", 10.3157, 123.8854)
+
+    response = client.get(
+        "/addresses",
+        params={"latitude": 14.5826, "longitude": 120.9787, "distance": 1},
+    )
+
+    assert response.status_code == 200
+    assert [address["street"] for address in response.json()] == ["Rizal Park"]
+
+
+def test_list_addresses_nearby_requires_valid_query(client):
+    missing = client.get("/addresses", params={"latitude": 14.5826})
+    assert missing.status_code == 422
+
+    negative_distance = client.get(
+        "/addresses",
+        params={"latitude": 14.5826, "longitude": 120.9787, "distance": 0},
+    )
+    assert negative_distance.status_code == 422

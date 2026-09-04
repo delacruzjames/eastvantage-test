@@ -2,8 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.logging_config import configure_logging, get_logger
+from app.middleware import log_requests
 from app.models import Address  # noqa: F401
 from app.routers import addresses, health
+
+configure_logging()
+logger = get_logger(__name__)
 
 app = FastAPI(
     title=settings.app_name,
@@ -13,6 +18,8 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+app.middleware("http")(log_requests)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,3 +31,5 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(addresses.router, prefix="/addresses", tags=["Addresses"])
+
+logger.info("%s started with database %s", settings.app_name, settings.database_url)
