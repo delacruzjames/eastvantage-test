@@ -24,7 +24,7 @@ def test_create_address(client):
     assert body["updated_at"]
 
 
-def test_create_address_without_coordinates(client):
+def test_create_address_requires_coordinates(client):
     response = client.post(
         "/addresses",
         json={
@@ -36,10 +36,7 @@ def test_create_address_without_coordinates(client):
         },
     )
 
-    assert response.status_code == 201
-    body = response.json()
-    assert body["latitude"] is None
-    assert body["longitude"] is None
+    assert response.status_code == 422
 
 
 def test_create_address_missing_fields(client):
@@ -89,6 +86,8 @@ def test_patch_address_invalid_coordinates(client):
             "state": "NCR",
             "postal_code": "1000",
             "country": "Philippines",
+            "latitude": 14.5995,
+            "longitude": 120.9842,
         },
     ).json()
 
@@ -108,6 +107,8 @@ def test_delete_address(client):
             "state": "NCR",
             "postal_code": "1000",
             "country": "Philippines",
+            "latitude": 14.5995,
+            "longitude": 120.9842,
         },
     ).json()
 
@@ -157,9 +158,9 @@ def test_list_addresses_nearby(client):
     assert 0 < body[1]["distance_km"] <= 20
 
 
-def test_list_addresses_nearby_excludes_far_and_uncoordinated(client):
+def test_list_addresses_nearby_excludes_far_addresses(client):
     _create(client, "Rizal Park", 14.5826, 120.9787)
-    _create(client, "No Coordinates")
+    _create(client, "Cebu City", 10.3157, 123.8854)
 
     response = client.get(
         "/addresses",

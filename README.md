@@ -71,6 +71,9 @@ Create a new revision after model changes:
 
 ### Find addresses near a coordinate
 
+Create and update validate coordinates (`latitude` -90 to 90, `longitude` -180
+to 180). Create requires both coordinates.
+
 `distance` is a radius in kilometers. Results are sorted from nearest to
 farthest and include the calculated `distance_km`.
 

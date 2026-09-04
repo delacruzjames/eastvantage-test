@@ -9,8 +9,8 @@ class AddressCreate(BaseModel):
     state: str = Field(..., min_length=1, max_length=100)
     postal_code: str = Field(..., min_length=1, max_length=20)
     country: str = Field(..., min_length=1, max_length=100)
-    latitude: float | None = Field(default=None, ge=-90, le=90)
-    longitude: float | None = Field(default=None, ge=-180, le=180)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
 
 
 class AddressUpdate(BaseModel):

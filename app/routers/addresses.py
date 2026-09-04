@@ -4,16 +4,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logging_config import get_logger
 from app.models.address import Address
 from app.schemas.address import AddressCreate, AddressNearby, AddressRead, AddressUpdate
 from app.services.geo import bounding_box, haversine_km
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 def _get_address_or_404(address_id: int, db: Session) -> Address:
     address = db.get(Address, address_id)
     if address is None:
+        logger.warning("Address %s not found", address_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
     return address
 
@@ -46,6 +49,14 @@ def list_addresses_nearby(
                 )
             )
 
+    logger.info(
+        "Found %s of %s candidate addresses within %skm of (%s, %s)",
+        len(matches),
+        len(candidates),
+        distance,
+        latitude,
+        longitude,
+    )
     return sorted(matches, key=lambda match: match.distance_km)
 
 
@@ -63,6 +74,7 @@ def create_address(payload: AddressCreate, db: Session = Depends(get_db)) -> Add
     db.add(address)
     db.commit()
     db.refresh(address)
+    logger.info("Created address %s in %s, %s", address.id, address.city, address.country)
     return address
 
 
@@ -79,6 +91,7 @@ def update_address(
     address.updated_at = datetime.now(UTC)
     db.commit()
     db.refresh(address)
+    logger.info("Updated address %s fields=%s", address.id, sorted(updates))
     return address
 
 
@@ -87,3 +100,4 @@ def delete_address(address_id: int, db: Session = Depends(get_db)) -> None:
     address = _get_address_or_404(address_id, db)
     db.delete(address)
     db.commit()
+    logger.info("Deleted address %s", address_id)
