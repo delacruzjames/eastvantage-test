@@ -64,6 +64,16 @@ Create a new revision after model changes:
 | Method | Path | Description |
 | --- | --- | --- |
 | GET | `/health` | Health check |
+| GET | `/addresses` | Find addresses within a distance of a coordinate |
 | POST | `/addresses` | Create an address |
 | PATCH | `/addresses/{id}` | Update an address |
 | DELETE | `/addresses/{id}` | Delete an address |
+
+### Find addresses near a coordinate
+
+`distance` is a radius in kilometers. Results are sorted from nearest to
+farthest and include the calculated `distance_km`.
+
+```bash
+curl "http://localhost:8000/addresses?latitude=14.5826&longitude=120.9787&distance=20"
+```
