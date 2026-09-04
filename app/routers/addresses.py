@@ -1,3 +1,5 @@
+"""Address book endpoints: create, update, delete, and nearby search."""
+
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -14,6 +16,7 @@ logger = get_logger(__name__)
 
 
 def _get_address_or_404(address_id: int, db: Session) -> Address:
+    """Load an address or raise 404 so callers stay consistent."""
     address = db.get(Address, address_id)
     if address is None:
         logger.warning("Address %s not found", address_id)
@@ -28,6 +31,11 @@ def list_addresses_nearby(
     distance: float = Query(..., gt=0, le=20037, description="Search radius in kilometers"),
     db: Session = Depends(get_db),
 ) -> list[AddressNearby]:
+    """Return addresses inside `distance` km of the given coordinates.
+
+    A bounding box filters SQLite rows first, then haversine keeps only
+    points actually inside the circle. Results are nearest first.
+    """
     min_lat, max_lat, min_lon, max_lon = bounding_box(latitude, longitude, distance)
 
     candidates = (
@@ -62,6 +70,7 @@ def list_addresses_nearby(
 
 @router.post("", response_model=AddressRead, status_code=status.HTTP_201_CREATED)
 def create_address(payload: AddressCreate, db: Session = Depends(get_db)) -> Address:
+    """Create an address. Latitude and longitude are required."""
     address = Address(
         street=payload.street,
         city=payload.city,
@@ -84,6 +93,7 @@ def update_address(
     payload: AddressUpdate,
     db: Session = Depends(get_db),
 ) -> Address:
+    """Update only the fields sent in the request body."""
     address = _get_address_or_404(address_id, db)
     updates = payload.model_dump(exclude_unset=True)
     for field, value in updates.items():
@@ -97,6 +107,7 @@ def update_address(
 
 @router.delete("/{address_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_address(address_id: int, db: Session = Depends(get_db)) -> None:
+    """Delete an address. Returns 204, or 404 if it does not exist."""
     address = _get_address_or_404(address_id, db)
     db.delete(address)
     db.commit()

@@ -63,14 +63,50 @@ SQLite data is stored in a Docker volume (`sqlite-data`). Stop with `Ctrl+C` or 
 | PATCH | `/addresses/{id}` | Update an address |
 | DELETE | `/addresses/{id}` | Delete an address |
 
-### Find addresses near a coordinate
+Create requires `latitude` (-90 to 90) and `longitude` (-180 to 180).
+`distance` is a radius in kilometers. Nearby results are nearest first and
+include `distance_km`.
 
-Create and update validate coordinates (`latitude` -90 to 90, `longitude` -180
-to 180). Create requires both coordinates.
+### Sample curls
 
-`distance` is a radius in kilometers. Results are sorted from nearest to
-farthest and include the calculated `distance_km`.
+Health:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Create:
+
+```bash
+curl -X POST http://localhost:8000/addresses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "street": "Rizal Park",
+    "city": "Manila",
+    "state": "NCR",
+    "postal_code": "1000",
+    "country": "Philippines",
+    "latitude": 14.5826,
+    "longitude": 120.9787
+  }'
+```
+
+Find nearby (20 km from Rizal Park):
 
 ```bash
 curl "http://localhost:8000/addresses?latitude=14.5826&longitude=120.9787&distance=20"
+```
+
+Update (send only the fields to change):
+
+```bash
+curl -X PATCH http://localhost:8000/addresses/1 \
+  -H "Content-Type: application/json" \
+  -d '{"street": "Rizal Park, Ermita"}'
+```
+
+Delete:
+
+```bash
+curl -X DELETE http://localhost:8000/addresses/1
 ```
