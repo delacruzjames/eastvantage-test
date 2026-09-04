@@ -13,6 +13,16 @@ class AddressCreate(BaseModel):
     longitude: float | None = Field(default=None, ge=-180, le=180)
 
 
+class AddressUpdate(BaseModel):
+    street: str | None = Field(default=None, min_length=1, max_length=255)
+    city: str | None = Field(default=None, min_length=1, max_length=100)
+    state: str | None = Field(default=None, min_length=1, max_length=100)
+    postal_code: str | None = Field(default=None, min_length=1, max_length=20)
+    country: str | None = Field(default=None, min_length=1, max_length=100)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+
+
 class AddressRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

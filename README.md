@@ -65,3 +65,4 @@ Create a new revision after model changes:
 | --- | --- | --- |
 | GET | `/health` | Health check |
 | POST | `/addresses` | Create an address |
+| PATCH | `/addresses/{id}` | Update an address |
